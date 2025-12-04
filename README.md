@@ -1,121 +1,37 @@
-# EXPERIMENT--04-INTERFACING-AN16X2-LCD-DISPLAY-WITH-ARM AND DISPLAY STRING
-# Name : yadhav G.P
-# Reg.no : 212223230247
-## Aim:
-To Interface a 16X2 LCD display to ARM controller  , and simulate it in Proteus 
-## Components required:
+# EXPERIMENT-06-INTERRUPT-GENERATION-USING-PUSHBUTTON-AND-SIMULATING-THE-OUTPUT
+
+### Aim:
+To Interface a push button and generate an interrupt , simulate it using an led and simuate it on  proteus 
+
+### Components required:
 STM32 CUBE IDE, Proteus 8 simulator .
-## Theory 
-The full form of an ARM is an advanced reduced instruction set computer (RISC) machine, and it is a 32-bit processor architecture expanded by ARM holdings. The applications of an ARM processor include several microcontrollers as well as processors. The architecture of an ARM processor was licensed by many corporations for designing ARM processor-based SoC products and CPUs. This allows the corporations to manufacture their products using ARM architecture. Likewise, all main semiconductor companies will make ARM-based SOCs such as Samsung, Atmel, TI etc.
 
-What is an ARM7 Processor?
-ARM7 processor is commonly used in embedded system applications. Also, it is a balance among classic as well as new-Cortex sequence. This processor is tremendous in finding the resources existing on the internet with excellence documentation offered by NXP Semiconductors. It suits completely for an apprentice to obtain in detail hardware & software design implementation.
- STM32F401xB STM32F401xC ARM® Cortex®-M4 32b MCU+FPU, 105 DMIPS, 256KB Flash/64KB RAM, 11 TIMs, 1 ADC, 11 comm.
-interfaces Datasheet - production data Features
-• Core: ARM® 32-bit Cortex®-M4 CPU with FPU, Adaptive real-time accelerator (ART Accelerator™) allowing 0-wait state execution from Flash memory, frequency up to 84 MHz, memory protection unit, 105 DMIPS/ 1.
-25 DMIPS/MHz (Dhrystone 2.
-1), and DSP instructions
-• Memories – Up to 256 Kbytes of Flash memory – Up to 64 Kbytes of SRAM
+### Theory:
 
+ARM v7 Core supports multiple great features for handling exceptions and interrupts. Which includes the Nested Vectored Interrupt Controller (NVIC).
 
-   ## LCD 16X2 
-   16×2 LCD is named so because; it has 16 Columns and 2 Rows. There are a lot of combinations available like,
-   8×1, 8×2, 10×2, 16×1, etc. But the most used one is the 16*2 LCD, hence we are using it here.
+Micro-Coded Architecture So that interrupt stacking, entry, and exit are done automatically in hardware. Which offloads this work overhead from the CPU
+### Processor Mode
 
-All the above mentioned LCD display will have 16 Pins and the programming approach is also the same and hence the choice is left to you. 
-Below is the Pinout and Pin Description of 16x2 LCD Module:
+The processor mode can change when exceptions occur. And it can be in one of the following modes:
+Thread Mode: Which is entered on reset.
+Handler Mode: Which is entered on all other exceptions.
+![image](https://github.com/vasanthkumarch/EXPERIMENT-06-INTERRUPT-GENERATION-USING-PUSHBUTTON-AND-SIMULATING-THE-OUTPUT-/assets/36288975/4f52f2d6-4cdb-4315-b2b2-b55dc1639c43)
+The STM32 ARM microcontroller interrupts are generated in the following manner:
 
-![image](https://user-images.githubusercontent.com/36288975/233858086-7b1a88a2-f941-475c-86c2-b3bae68bdf7e.png)
-![image](https://user-images.githubusercontent.com/36288975/233857710-541ac1c2-786c-4dfc-b7b5-e3a4868a9cb6.png)
-![image](https://user-images.githubusercontent.com/36288975/233857733-05df5dbf-1a1e-479e-85bb-8014a39ad878.png)
+The system runs the ISR and then goes back to the main program. The NVIC and EXTI are configured. The Interrupt Service Routine (ISR) also known as the interrupt service routine handler is defined to enable the external interrupts.
 
-4-bit and 8-bit Mode of LCD:
+Let us learn about the important features which are needed to configure external interrupts in STM32 microcontrollers
 
-The LCD can work in two different modes, namely the 4-bit mode and the 8-bit mode. In 4 bit mode we send the data nibble by nibble, first upper nibble and then lower nibble. For those of you who don’t know what a nibble is: a nibble is a group of four bits, so the lower four bits (D0-D3) of a byte form the lower nibble while the upper four bits (D4-D7) of a byte form the higher nibble. This enables us to send 8 bit data.
+Interrupt Lines (EXTI0-EXTI15)
+The STM32 ARM microcontroller features 23 event sources which are divided into two sections. The first section corresponds t external pins on each port which are P0-P15. The second section corresponds to RTC, ethernet, USB interrupts. Therefore, in the first section, we have 16 lines corresponding to line0 till line15. All of these map to a pin number.
+The diagram below shows how the GPIO pins are connected to the 16 interrupt lines:
 
-Whereas in 8 bit mode we can send the 8-bit data directly in one stroke since we use all the 8 data lines.
+![image](https://github.com/vasanthkumarch/EXPERIMENT-06-INTERRUPT-GENERATION-USING-PUSHBUTTON-AND-SIMULATING-THE-OUTPUT-/assets/36288975/3e1ededb-144c-4103-a64e-9132b7e06e1b)
 
- 8-bit mode is faster and flawless than 4-bit mode. But the major drawback is that it needs 8 data lines connected to the microcontroller. This will make us run out of I/O pins on our MCU, so 4-bit mode is widely used. No control pins are used to set these modes. 
- LCD Commands:
+One important thing to note here is that same number pins are connected to line with the same number. All of these then join to form a single line. Additionally, we can not use two pins one one line at the same time. For example out of PA1, PB1, PC1, PD1, PE1, PF1 and PG1 you can only use a single pin out of all these. This is because they are all connected to the same line EXTI1. However you can use PA1 and PA2 at the same time as they are connected with different lines.
 
-There are some preset commands instructions in LCD, which we need to send to LCD through some microcontroller. Some important command instructions are given below:
-
-Hex Code
-
-Command to LCD Instruction Register
-
-0F
-
-LCD ON, cursor ON
-
-01
-
-Clear display screen
-
-02
-
-Return home
-
-04
-
-Decrement cursor (shift cursor to left)
-
-06
-
-Increment cursor (shift cursor to right)
-
-05
-
-Shift display right
-
-07
-
-Shift display left
-
-0E
-
-Display ON, cursor blinking
-
-80
-
-Force cursor to beginning of first line
-
-C0
-
-Force cursor to beginning of second line
-
-38
-
-2 lines and 5×7 matrix
-
-83
-
-Cursor line 1 position 3
-
-3C
-
-Activate second line
-
-08
-
-Display OFF, cursor OFF
-
-C1
-
-Jump to second line, position 1
-
-OC
-
-Display ON, cursor OFF
-
-C1
-
-Jump to second line, position 1
-
-C2
-
-Jump to second line, position 2
- 
+Now each of these lines EXTI0-EXTI15 can be used to trigger an interrupt on different modes of the signal : rising edge, falling edge or rising_falling edge.
 ## Procedure:
  1. click on STM 32 CUBE IDE, the following screen will appear 
  ![image](https://user-images.githubusercontent.com/36288975/226189166-ac10578c-c059-40e7-8b80-9f84f64bf088.png)
@@ -145,8 +61,7 @@ Jump to second line, position 2
 8. edit the program and as per required 
 ![image](https://user-images.githubusercontent.com/36288975/226189461-a573e62f-a109-4631-a250-a20925758fe0.png)
 
-9. Add necessary library files of LCD 16x2 , write the program and use project and build  
-
+9. Select EXTI pin configuration and clock configuration 
 ![image](https://user-images.githubusercontent.com/36288975/226189554-3f7101ac-3f41-48fc-abc7-480bd6218dec.png)
 10. once the project is bulild 
 ![image](https://user-images.githubusercontent.com/36288975/226189577-c61cc1eb-3990-4968-8aa6-aefffc766b70.png)
@@ -170,16 +85,12 @@ https://engineeringxpert.com/wp-content/uploads/2022/04/26.png
 
 ![image](https://user-images.githubusercontent.com/36288975/233856904-99eb708a-c907-4595-9025-c9dbd89b8879.png)
 
-## CIRCUIT DIAGRAM 
-![image](https://user-images.githubusercontent.com/36288975/233857974-bda6200e-4f88-4e7b-b189-4da80210fa23.png)
 
+  
 
 ## STM 32 CUBE PROGRAM :
-
 ```
-
 #include "main.h"
-#include "lcd.h"
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
 int main(void)
@@ -187,20 +98,16 @@ int main(void)
   HAL_Init();
   SystemClock_Config();
   MX_GPIO_Init();
-  Lcd_PortType ports[]= {GPIOA,GPIOA,GPIOA,GPIOA};
-  Lcd_PinType pins[] = {GPIO_PIN_6,GPIO_PIN_5,GPIO_PIN_4,GPIO_PIN_3};
-  Lcd_HandleTypeDef lcd;
-  lcd = Lcd_create(ports, pins, GPIOB,GPIO_PIN_1, GPIOB,GPIO_PIN_0, LCD_4_BIT_MODE);
-  Lcd_cursor(&lcd,0,0);
-  Lcd_string(&lcd, "HEMNATH");
-  HAL_Delay(1000);
-  Lcd_cursor(&lcd,1,1);
-  Lcd_string(&lcd, "212224240057");
-  HAL_Delay(1000);
   while (1)
   {
-    
   }
+}
+void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin)
+{
+	if (GPIO_Pin==GPIO_PIN_0)
+	{
+		HAL_GPIO_TogglePin(GPIOA,GPIO_PIN_10);
+	}
 }
 void SystemClock_Config(void)
 {
@@ -208,6 +115,7 @@ void SystemClock_Config(void)
   RCC_ClkInitTypeDef RCC_ClkInitStruct = {0};
   __HAL_RCC_PWR_CLK_ENABLE();
   __HAL_PWR_VOLTAGESCALING_CONFIG(PWR_REGULATOR_VOLTAGE_SCALE2);
+  
   RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI;
   RCC_OscInitStruct.HSIState = RCC_HSI_ON;
   RCC_OscInitStruct.HSICalibrationValue = RCC_HSICALIBRATION_DEFAULT;
@@ -216,60 +124,67 @@ void SystemClock_Config(void)
   {
     Error_Handler();
   }
+  
   RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK|RCC_CLOCKTYPE_SYSCLK
                               |RCC_CLOCKTYPE_PCLK1|RCC_CLOCKTYPE_PCLK2;
   RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_HSI;
   RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
   RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV1;
   RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV1;
+
   if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_0) != HAL_OK)
   {
     Error_Handler();
   }
 }
+
+
 static void MX_GPIO_Init(void)
 {
   GPIO_InitTypeDef GPIO_InitStruct = {0};
   __HAL_RCC_GPIOA_CLK_ENABLE();
-  __HAL_RCC_GPIOB_CLK_ENABLE();
-  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_3|GPIO_PIN_4|GPIO_PIN_5|GPIO_PIN_6, GPIO_PIN_RESET);
-  HAL_GPIO_WritePin(GPIOB, GPIO_PIN_0|GPIO_PIN_1, GPIO_PIN_RESET);
-  GPIO_InitStruct.Pin = GPIO_PIN_3|GPIO_PIN_4|GPIO_PIN_5|GPIO_PIN_6;
+
+  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_10, GPIO_PIN_RESET);
+
+  GPIO_InitStruct.Pin = GPIO_PIN_0;
+  GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
+  GPIO_InitStruct.Pull = GPIO_PULLUP;
+  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+
+  GPIO_InitStruct.Pin = GPIO_PIN_10;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
-  GPIO_InitStruct.Pin = GPIO_PIN_0|GPIO_PIN_1;
-  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+
+  HAL_NVIC_SetPriority(EXTI0_IRQn, 0, 0);
+  HAL_NVIC_EnableIRQ(EXTI0_IRQn);
+
 }
 void Error_Handler(void)
 {
+  
   __disable_irq();
   while (1)
   {
   }
 }
-
-#ifdef  USE_FULL_ASSERT
 void assert_failed(uint8_t *file, uint32_t line)
 {
-
+  
 }
-#endif
 ```
 
 
+
+
 ## Output screen shots of proteus  :
-![WhatsApp Image 2025-10-13 at 19 49 32_fa8775e0](https://github.com/user-attachments/assets/6c54e07d-c20a-4185-ae7c-ddd88f260ade)
+ <img width="1280" height="800" alt="image" src="https://github.com/user-attachments/assets/1970e568-65e1-45ee-9f24-b80d5c5a4a3b" />
 
-
-## CIRCUIT DIAGRAM (EXPORT THE GRAPHICS TO PDF AND ADD THE SCREEN SHOT HERE): 
-<img width="1024" height="824" alt="image" src="https://github.com/user-attachments/assets/a34d995e-1f31-40a4-9d84-a7765c5ea5b1" />
-
+ 
+ ## CIRCUIT DIAGRAM (EXPORT THE GRAPHICS TO PDF AND ADD THE SCREEN SHOT HERE): 
+ <img width="1080" height="828" alt="image" src="https://github.com/user-attachments/assets/de9efe4f-e64e-44fd-a5fb-d199ad5479b8" />
 
  
 ## Result :
-Interfacing a lcd display with ARM microcontroller are simulated in proteus and the results are verified.
+Interfacing a push button and interrupt genrateion is simulated using proteus 
